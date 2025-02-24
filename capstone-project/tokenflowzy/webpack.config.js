@@ -2,7 +2,7 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
 const webpack = require('webpack');
-
+const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 
 module.exports = {
   entry: './src/index.tsx',
@@ -20,7 +20,9 @@ module.exports = {
       "zlib": require.resolve("browserify-zlib"),
       "url": require.resolve("url/"),
       "vm": require.resolve("vm-browserify"),
-      "buffer": require.resolve("buffer")
+      "buffer": require.resolve("buffer"),
+      "os": require.resolve('os-browserify/browser'),
+      "fs": require.resolve('browserify-fs'),
     }
   },
   module: {
@@ -48,6 +50,7 @@ module.exports = {
     new webpack.ProvidePlugin({
         process: 'process/browser',
     }),
+    new NodePolyfillPlugin()
   ],
   devServer: {
     static: {

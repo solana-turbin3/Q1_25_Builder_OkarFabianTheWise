@@ -22,6 +22,7 @@ interface TokenInfoFormProps {
   onSupplyChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
   onImageChange: (file: File | null) => void;
+  onSubmit: (e: React.FormEvent) => void;
 }
 
 const TokenInfoForm: React.FC<TokenInfoFormProps> = ({
@@ -36,6 +37,7 @@ const TokenInfoForm: React.FC<TokenInfoFormProps> = ({
   onSupplyChange,
   onDescriptionChange,
   onImageChange,
+  onSubmit,
 }) => {
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -60,133 +62,113 @@ const TokenInfoForm: React.FC<TokenInfoFormProps> = ({
   };
 
   return (
-    <div className="relative text-white flex items-center justify-center px-4 sm:px-0">
+    <div className="w-full">
       <motion.div
-        className="w-full z-[1] max-w-md p-4 sm:p-8 rounded-xl shadow-lg bg-transparent border-2 border-[#009933]"
+        className="w-full backdrop-blur-sm bg-black/30 rounded-2xl shadow-xl border border-[#009933]/30"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
-        <form className="space-y-4 sm:space-y-6">
-          <motion.div variants={inputVariants} className="space-y-2">
-            <div className="relative bg-transparent">
-              <FiFileText
-                color="#8B5CF6"
-                className="absolute left-3 top-1/2 transform -translate-y-1/2"
-              />
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => onNameChange(e.target.value)}
-                className="w-full pl-10 pr-3 sm:pr-4 py-2.5 sm:py-3 rounded-lg border border-[#009933] bg-black/80 focus:outline-none focus:ring-2 focus:ring-[#009933] text-sm sm:text-base"
-                placeholder="Token Name"
-                required
-              />
-            </div>
-          </motion.div>
+        <div className="p-6 md:p-8">
+          <h2 className="text-2xl font-bold text-white mb-6">Create Token</h2>
+          <form className="space-y-5">
+            {[
+              {
+                icon: <FiFileText />,
+                value: name,
+                onChange: onNameChange,
+                placeholder: "Token Name",
+                type: "text",
+              },
+              {
+                icon: <FiHash />,
+                value: symbol,
+                onChange: onSymbolChange,
+                placeholder: "Token Symbol",
+                type: "text",
+              },
+              {
+                icon: <FiDatabase />,
+                value: decimals,
+                onChange: onDecimalsChange,
+                placeholder: "Decimals",
+                type: "number",
+              },
+              {
+                icon: <FiDollarSign />,
+                value: supply,
+                onChange: onSupplyChange,
+                placeholder: "Total Supply",
+                type: "text",
+              },
+            ].map((field, index) => (
+              <motion.div
+                key={index}
+                variants={inputVariants}
+                className="relative"
+              >
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#009933]">
+                  {field.icon}
+                </span>
+                <input
+                  type={field.type}
+                  value={field.value}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 rounded-xl bg-black/50 border border-[#009933]/30 
+                    focus:border-[#009933] focus:ring-1 focus:ring-[#009933] transition-all duration-200
+                    text-white placeholder-gray-400 text-sm md:text-base"
+                  placeholder={field.placeholder}
+                  required
+                />
+              </motion.div>
+            ))}
 
-          <motion.div variants={inputVariants} className="space-y-2">
-            <div className="relative">
-              <FiHash
-                color="#8B5CF6"
-                className="absolute left-3 top-1/2 transform -translate-y-1/2"
-              />
-              <input
-                type="text"
-                value={symbol}
-                onChange={(e) => onSymbolChange(e.target.value)}
-                className="w-full pl-10 pr-3 sm:pr-4 py-2.5 sm:py-3 rounded-lg border border-[#009933] bg-black/80 focus:outline-none focus:ring-2 focus:ring-[#009933] text-sm sm:text-base"
-                placeholder="Token Symbol"
-                required
-              />
-            </div>
-          </motion.div>
-
-          <motion.div variants={inputVariants} className="space-y-2">
-            <div className="relative">
-              <FiDatabase
-                color="#8B5CF6"
-                className="absolute left-3 top-1/2 transform -translate-y-1/2"
-              />
-              <input
-                type="number"
-                value={decimals}
-                onChange={(e) => onDecimalsChange(Number(e.target.value))}
-                className="w-full pl-10 pr-3 sm:pr-4 py-2.5 sm:py-3 rounded-lg border border-[#009933] bg-black/80 focus:outline-none focus:ring-2 focus:ring-[#009933] text-sm sm:text-base"
-                placeholder="Decimals"
-                required
-              />
-            </div>
-          </motion.div>
-
-          <motion.div variants={inputVariants} className="space-y-2">
-            <div className="relative">
-              <FiDollarSign
-                color="#8B5CF6"
-                className="absolute left-3 top-1/2 transform -translate-y-1/2"
-              />
-              <input
-                type="text"
-                value={supply}
-                onChange={(e) => onSupplyChange(e.target.value)}
-                className="w-full pl-10 pr-3 sm:pr-4 py-2.5 sm:py-3 rounded-lg border border-[#009933] bg-black/80 focus:outline-none focus:ring-2 focus:ring-[#009933] text-sm sm:text-base"
-                placeholder="Total Supply"
-                required
-              />
-            </div>
-          </motion.div>
-
-          <motion.div variants={inputVariants} className="space-y-2">
-            <div className="relative">
-              <FiFile color="#8B5CF6" className="absolute left-3 top-3" />
+            <motion.div variants={inputVariants} className="relative">
+              <span className="absolute left-3 top-3 text-[#009933]">
+                <FiFile />
+              </span>
               <textarea
                 value={description}
                 onChange={(e) => onDescriptionChange(e.target.value)}
-                className="w-full pl-10 pr-3 sm:pr-4 py-2.5 sm:py-3 rounded-lg border border-[#009933] bg-black/80 focus:outline-none focus:ring-2 focus:ring-[#009933] text-sm sm:text-base"
+                className="w-full pl-10 pr-4 py-3 rounded-xl bg-black/50 border border-[#009933]/30
+                  focus:border-[#009933] focus:ring-1 focus:ring-[#009933] transition-all duration-200
+                  text-white placeholder-gray-400 text-sm md:text-base resize-none"
                 placeholder="Token Description"
                 rows={4}
               />
-            </div>
-          </motion.div>
+            </motion.div>
 
-          <motion.div variants={inputVariants} className="space-y-2">
-            <div className="relative">
-              <FiImage
-                color="#8B5CF6"
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 z-10"
-              />
-              <div className="relative">
+            <motion.div variants={inputVariants} className="relative">
+              <label
+                className="flex items-center gap-2 p-3 rounded-xl cursor-pointer
+                border border-dashed border-[#009933]/30 hover:border-[#009933] transition-colors"
+              >
+                <FiImage className="text-[#009933]" />
+                <span className="text-sm text-gray-300">
+                  Upload Token Image
+                </span>
                 <input
                   type="file"
                   onChange={(e) => onImageChange(e.target.files?.[0] || null)}
-                  className="block w-full text-sm text-white
-          file:mr-4 file:py-2.5 file:px-4
-          file:rounded-lg file:border-0
-          file:text-sm file:font-normal
-          file:bg-[#009933] file:text-white
-          file:cursor-pointer
-          hover:file:bg-[#00802b]
-          cursor-pointer
-          pl-10 pr-3 sm:pr-4 py-2.5 sm:py-3 
-          rounded-lg border border-[#009933] 
-          bg-black/80 
-          focus:outline-none focus:ring-2 
-          focus:ring-[#009933]"
+                  className="hidden"
                   accept="image/*"
                 />
-              </div>
-            </div>
-          </motion.div>
+              </label>
+            </motion.div>
 
-          <motion.button
-            type="submit"
-            className="w-full pl-10 pr-3 sm:pr-4 py-2.5 sm:py-3 rounded-lg border border-[#009933] bg-black/80 focus:outline-none focus:ring-2 focus:ring-[#009933] text-sm sm:text-base align-center"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            Create Token
-          </motion.button>
-        </form>
+            <motion.button
+              type="submit"
+              onClick={onSubmit}
+              className="w-full py-3 px-4 rounded-xl bg-[#009933] text-white font-medium
+                hover:bg-[#00802b] transition-colors duration-200 text-sm md:text-base
+                focus:outline-none focus:ring-2 focus:ring-[#009933] focus:ring-offset-2 focus:ring-offset-black"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              Create Token
+            </motion.button>
+          </form>
+        </div>
       </motion.div>
     </div>
   );

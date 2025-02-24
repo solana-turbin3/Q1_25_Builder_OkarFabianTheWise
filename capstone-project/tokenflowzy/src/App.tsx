@@ -1,24 +1,28 @@
 import React from "react";
-import {
-  BrowserRouter as Router,
-  Route,
-  Routes,
-  // Navigate,
-} from "react-router-dom";
-// import Home from './pages/Home';
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
+
 import TokenCreator from "./components/Generator";
 import Header from "./components/Header";
+import Footer from "./components/Footer";
 import WalletContextProvider from "./solactions/WalletConnect";
+import { UpdateTokenMetadata } from "./components/met";
 
 const App: React.FC = () => {
   return (
     <WalletContextProvider>
       <Router>
-        <Header />
-        {/* public routes */}
-        <Routes>
-          <Route path="/" element={<TokenCreator />} />
-        </Routes>
+        <div className="flex flex-col min-h-screen">
+          <Header />
+          <main className="flex-grow pt-16">
+            <Toaster position="top-right" />
+            <Routes>
+              <Route path="/" element={<TokenCreator />} />
+              <Route path="/met" element={<UpdateTokenMetadata />} />
+            </Routes>
+          </main>
+          <Footer />
+        </div>
       </Router>
     </WalletContextProvider>
   );

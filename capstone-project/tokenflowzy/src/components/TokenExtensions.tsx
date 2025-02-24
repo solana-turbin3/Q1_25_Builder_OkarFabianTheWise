@@ -17,10 +17,8 @@ const TokenExtensions: React.FC<TokenExtensionsProps> = ({
   const [extensions, setExtensions] = useState<TokenExtension[]>([
     { id: "transfer-fee", name: "Transfer Fees", isConnected: false },
     { id: "royalty-fee", name: "Royalty Fee", isConnected: false },
-    { id: "vault-fee", name: "Vault Fee", isConnected: false },
     { id: "renounce", name: "Renounce", isConnected: false },
-    { id: "soul-bound", name: "Soul-Bound", isConnected: false },
-    { id: "interest-bearing", name: "Interest-Bearing", isConnected: false },
+    { id: "interest-bsearing", name: "Interest-Bearing", isConnected: false },
   ]);
 
   const toggleConnection = (id: string) => {
@@ -32,35 +30,52 @@ const TokenExtensions: React.FC<TokenExtensionsProps> = ({
   };
 
   return (
-    <div className="mt-6 space-y-4">
-      <h3 className="text-lg font-semibold text-white">Token Extensions</h3>
-      <div className="flex flex-col gap-3">
-        {extensions.map((extension) => (
-          <motion.div
-            key={extension.id}
-            className={`
-              p-4 rounded-lg cursor-pointer border-2
-              ${
-                extension.isConnected
-                  ? "border-[#009933] bg-[#009933]/20"
-                  : "border-gray-600 bg-black/40"
-              }
-            `}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => toggleConnection(extension.id)}
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-white">{extension.name}</span>
-              <div
-                className={`
-                w-3 h-3 rounded-full
-                ${extension.isConnected ? "bg-[#009933]" : "bg-gray-600"}
+    <div className="w-full">
+      <div className="backdrop-blur-sm bg-black/30 rounded-2xl shadow-xl border border-[#009933]/30 p-6 md:p-8">
+        <h3 className="text-2xl font-bold text-white mb-6">Extensions</h3>
+        <div className="grid gap-3">
+          {extensions.map((extension) => (
+            <motion.div
+              key={extension.id}
+              className={`
+                relative overflow-hidden rounded-xl cursor-pointer
+                transition-all duration-200 ease-out
+                ${
+                  extension.isConnected
+                    ? "bg-[#009933]/10 border-[#009933]/50"
+                    : "bg-black/50 border-gray-800"
+                }
+                border hover:border-[#009933]/30
               `}
-              />
-            </div>
-          </motion.div>
-        ))}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => toggleConnection(extension.id)}
+            >
+              <div className="p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`
+                    w-3 h-3 rounded-full transition-colors duration-200
+                    ${extension.isConnected ? "bg-[#009933]" : "bg-gray-600"}
+                  `}
+                  />
+                  <span className="text-white text-sm md:text-base font-medium">
+                    {extension.name}
+                  </span>
+                </div>
+                <motion.div
+                  animate={{
+                    scale: extension.isConnected ? 1 : 0.8,
+                    opacity: extension.isConnected ? 1 : 0.5,
+                  }}
+                  className="w-6 h-6 flex items-center justify-center"
+                >
+                  {extension.isConnected ? "✓" : ""}
+                </motion.div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -7,6 +7,9 @@ export default {
   ],
   theme: {
   	extend: {
+		perspective: {
+			'1000': '1000px',
+		},
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',

@@ -10,7 +10,8 @@ import { createSignerFromKeypair, signerIdentity, publicKey } from "@metaplex-fo
 import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
 
 // Define our Mint address
-const mint = publicKey("7efeK5MMfmgcNeJkutSduzBGskFHziBhvmoPcPrJBmuF")
+// const mint = publicKey("7efeK5MMfmgcNeJkutSduzBGskFHziBhvmoPcPrJBmuF")
+const mint = publicKey("9A4jpbm6RY2syKZSfeSWkFZzK28J3RomD3kGEAynLurk")
 
 // Create a UMI connection
 const umi = createUmi('https://api.devnet.solana.com');
@@ -27,10 +28,10 @@ umi.use(signerIdentity(createSignerFromKeypair(umi, keypair)));
         }
 
         let data: DataV2Args = {
-            name: "Prompt-OrkarFabianThewise",
+            name: "Rukewe",
             symbol: "POF",
             uri: 'https://arweave.net/123456',
-            sellerFeeBasisPoints: 400, // floating point is the worst choice in computing on blockchain
+            sellerFeeBasisPoints: 0, // floating point is the worst choice in computing on blockchain
             // more accuracy > increase
             creators: null,
             collection: null,
