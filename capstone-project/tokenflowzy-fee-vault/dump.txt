@@ -1,0 +1,163 @@
+use anchor_lang::prelude::*;
+use anchor_lang::solana_program::{program::invoke, system_instruction};
+
+declare_id!("8iezBeZrqss6nX9gnQavGDdBgzhD9eY2BUzFfGoL7Mgn");
+
+#[program]
+pub mod token_vault {
+    use super::*;
+
+    pub fn initialize(ctx: Context<Initialize>, owner: Pubkey) -> Result<()> {
+        ctx.accounts.initialize(owner, ctx.bumps.vault_state)?;
+        Ok(())
+    }
+
+    pub fn deposit(ctx: Context<Deposit>, amount: u64) -> Result<()> {
+        ctx.accounts.deposit(amount)?;
+        Ok(())
+    }
+
+    pub fn withdraw(ctx: Context<Withdraw>, amount: u64) -> Result<()> {
+        ctx.accounts.withdraw(amount)?;
+        Ok(())
+    }
+}
+
+#[account]
+#[derive(InitSpace)]
+pub struct VaultState {
+    pub owner: Pubkey,
+    pub vault_state_bump: u8,
+    pub revenue: u64,
+    pub tokens_deployed: u64,
+}
+
+#[derive(Accounts)]
+pub struct Initialize<'info> {
+    #[account(mut)]
+    pub payer: Signer<'info>,
+    #[account(
+        init,
+        payer = payer,
+        space = 8 + VaultState::INIT_SPACE,
+        seeds = [b"vault_state"],
+        bump,
+    )]
+    pub vault_state: Account<'info, VaultState>,
+    pub system_program: Program<'info, System>,
+}
+
+impl<'info> Initialize<'info> {
+    fn initialize(&mut self, owner: Pubkey, bump: u8) -> Result<()> {
+        let vault_state = &mut self.vault_state;
+        vault_state.owner = owner;
+        vault_state.vault_state_bump = bump;
+        vault_state.revenue = 0;
+        vault_state.tokens_deployed = 0;
+        Ok(())
+    }
+}
+
+#[derive(Accounts)]
+pub struct Deposit<'info> {
+    #[account(mut)]
+    pub depositor: Signer<'info>,
+    #[account(
+        mut,
+        seeds = [b"vault_state"],
+        bump = vault_state.vault_state_bump,
+    )]
+    pub vault_state: Account<'info, VaultState>,
+    pub system_program: Program<'info, System>,
+}
+
+impl<'info> Deposit<'info> {
+    fn deposit(&mut self, amount: u64) -> Result<()> {
+        let transfer_ix = system_instruction::transfer(
+            &self.depositor.key(),
+            &self.vault_state.to_account_info().key(),
+            amount,
+        );
+
+        invoke(
+            &transfer_ix,
+            &[
+                self.depositor.to_account_info(),
+                self.vault_state.to_account_info(),
+                self.system_program.to_account_info(),
+            ],
+        )?;
+
+        self.vault_state.revenue += amount;
+        self.vault_state.tokens_deployed += 1;
+
+        emit!(DepositEvent {
+            depositor: *self.depositor.key,
+            amount,
+            timestamp: Clock::get()?.unix_timestamp,
+        });
+
+        Ok(())
+    }
+}
+
+#[derive(Accounts)]
+pub struct Withdraw<'info> {
+    pub owner: Signer<'info>,
+    #[account(
+        mut,
+        seeds = [b"vault_state"],
+        bump = vault_state.vault_state_bump,
+        constraint = owner.key() == vault_state.owner @ ErrorCode::UnauthorizedWithdrawal
+    )]
+    pub vault_state: Account<'info, VaultState>,
+    #[account(mut)]
+    /// CHECK: Recipient for withdrawal
+    pub recipient: AccountInfo<'info>,
+    pub system_program: Program<'info, System>,
+}
+
+impl<'info> Withdraw<'info> {
+    fn withdraw(&mut self, amount: u64) -> Result<()> {
+        require!(
+            self.vault_state.to_account_info().lamports() >= amount,
+            ErrorCode::InsufficientFunds
+        );
+
+        **self
+            .vault_state
+            .to_account_info()
+            .try_borrow_mut_lamports()? -= amount;
+        **self.recipient.try_borrow_mut_lamports()? += amount;
+
+        emit!(WithdrawEvent {
+            recipient: *self.recipient.key,
+            amount,
+            timestamp: Clock::get()?.unix_timestamp,
+        });
+
+        Ok(())
+    }
+}
+
+#[event]
+pub struct DepositEvent {
+    pub depositor: Pubkey,
+    pub amount: u64,
+    pub timestamp: i64,
+}
+
+#[event]
+pub struct WithdrawEvent {
+    pub recipient: Pubkey,
+    pub amount: u64,
+    pub timestamp: i64,
+}
+
+#[error_code]
+pub enum ErrorCode {
+    #[msg("Only the vault owner can withdraw funds")]
+    UnauthorizedWithdrawal,
+    #[msg("Insufficient funds in vault")]
+    InsufficientFunds,
+}
